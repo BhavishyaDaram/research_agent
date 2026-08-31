@@ -1,48 +1,46 @@
-class ToolRegistry:
+class Tool:
+    def __init__(self, name, description, function, schema):
+        self.name = name
+        self.description = description
+        self.function = function
+        self._schema = schema
 
+    def schema(self):
+        return {
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": self._schema
+            }
+        }
+
+    def execute(self, arguments):
+        return self.function(**arguments)
+
+
+class ToolRegistry:
     def __init__(self):
         self.tools = {}
-
-    # -----------------------------
-    # Register a tool
-    # -----------------------------
 
     def register(self, tool):
         self.tools[tool.name] = tool
 
-
-    # -----------------------------
-    # Get tool schemas
-    # -----------------------------
+    def get(self, name):
+        return self.tools.get(name)
 
     def get_schemas(self):
-
-        schemas = []
-
-        for tool in self.tools.values():
-
-            schemas.append({
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.schema
-            })
-
-        return schemas
-
-
-    # -----------------------------
-    # Execute a tool
-    # -----------------------------
+        return [
+            tool.schema()
+            for tool in self.tools.values()
+        ]
 
     def execute(self, name, arguments):
+        tool = self.get(name)
 
-        if name not in self.tools:
-            return f"Error: Tool '{name}' not found."
+        if tool is None:
+            raise ValueError(
+                f"Tool '{name}' is not registered."
+            )
 
-        tool = self.tools[name]
-
-        try:
-            return tool.function(**arguments)
-
-        except Exception as e:
-            return f"Error executing '{name}': {str(e)}"
+        return tool.execute(arguments)

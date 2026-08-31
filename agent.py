@@ -1,10 +1,9 @@
 from llm import call_llm
 from registry import ToolRegistry
 
-
 class Agent:
 
-    def __init__(self, registry, max_steps=10):
+    def __init__(self, registry, max_steps=2):
         self.registry = registry
         self.max_steps = max_steps
 
@@ -19,59 +18,56 @@ class Agent:
 
         for step in range(self.max_steps):
 
-            print(f"\n--- Step {step + 1} ---")
-
-            # Send conversation + available tools to LLM
             response = call_llm(
                 conversation,
                 self.registry.get_schemas()
             )
 
             # --------------------------------
-            # Check if LLM wants to use a tool
+            # Tool call
             # --------------------------------
 
             if response["type"] == "tool_call":
 
                 tool_name = response["name"]
                 arguments = response["arguments"]
+                tool_call_id = response["tool_call_id"]
 
-                print(f"Tool: {tool_name}")
-                print(f"Arguments: {arguments}")
-
-                # Execute the requested tool
+                # Execute tool
                 result = self.registry.execute(
                     tool_name,
                     arguments
                 )
 
-                print(f"Tool Result: {result}")
-
-                # Send tool request to conversation
+                # Add assistant tool call
                 conversation.append({
                     "role": "assistant",
-                    "content": response
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": tool_call_id,
+                            "type": "function",
+                            "function": {
+                                "name": tool_name,
+                                "arguments": str(arguments)
+                            }
+                        }
+                    ]
                 })
 
-                # Send tool result back to LLM
+                # Add tool result
                 conversation.append({
                     "role": "tool",
+                    "tool_call_id": tool_call_id,
                     "content": str(result)
                 })
 
             # --------------------------------
-            # LLM has produced final answer
+            # Final answer
             # --------------------------------
 
             else:
 
-                print("\nAgent finished.")
-
                 return response["content"]
 
-        # --------------------------------
-        # Maximum steps reached
-        # --------------------------------
-
-        return "Agent stopped because maximum steps were reached."
-    
+        return "Unable to complete the research."

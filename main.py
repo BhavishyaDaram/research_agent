@@ -2,11 +2,10 @@ from agent import Agent
 from registry import ToolRegistry
 
 from tools import (
-    web_search,
-    fetch_page,
-    take_note
+    web_search_tool,
+    fetch_page_tool,
+    take_note_tool
 )
-
 
 def main():
 
@@ -17,9 +16,9 @@ def main():
     registry = ToolRegistry()
 
     # Register our research tools
-    registry.register(web_search)
-    registry.register(fetch_page)
-    registry.register(take_note)
+    registry.register(web_search_tool)
+    registry.register(fetch_page_tool)
+    registry.register(take_note_tool)
 
 
     # -----------------------------
@@ -28,7 +27,7 @@ def main():
 
     agent = Agent(
         registry=registry,
-        max_steps=10
+        max_steps=3
     )
 
 
@@ -52,9 +51,6 @@ def main():
     # 5. Print final answer
     # -----------------------------
 
-    print("\n" + "=" * 60)
-    print("FINAL ANSWER")
-    print("=" * 60)
 
     print(answer)
 

@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
-
 from registry import Tool
 
 
