@@ -39,7 +39,7 @@ class Agent:
                     arguments
                 )
 
-                # Add assistant tool call
+                # Assistant tool call
                 conversation.append({
                     "role": "assistant",
                     "content": None,
@@ -55,7 +55,7 @@ class Agent:
                     ]
                 })
 
-                # Add tool result
+                # Tool result
                 conversation.append({
                     "role": "tool",
                     "tool_call_id": tool_call_id,
